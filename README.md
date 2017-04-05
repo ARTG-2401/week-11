@@ -6,7 +6,7 @@
 > git clone "forked repository link"
 
 3. Navigate into the folder
-> cd Week-11
+> cd week-11
 
 4. Setup a python server
 > python -m SimpleHTTPServer
