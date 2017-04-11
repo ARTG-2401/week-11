@@ -1,4 +1,4 @@
-# week-10
+# week-11
 
 ## Steps to begin
 1. Fork this repository: _click the fork button on the right just above this repository_
@@ -6,7 +6,7 @@
 > git clone "forked repository link"
 
 3. Navigate into the folder
-> cd Week-9
+> cd week-11
 
 4. Setup a python server
 > python -m SimpleHTTPServer
