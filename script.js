@@ -1,46 +1,141 @@
-// LIST ARRAY IS WHERE OUR DATA FOR THIS APPLICATION LIVES
-var listArray = [
-  { name: "Books to Read",
+// master list array containing all our lists
+const data = [
+  { name: 'Books to Read',
     items: [
-      "Hitchhiker's Guide to Galaxy",
-      "Walden",
-      "The Elephant, the Tiger, and the Cell Phone"
+      'Hitchhiker\'s Guide to Galaxy',
+      'Walden',
+      'The Elephant, the Tiger, and the Cell Phone'
+    ]
+  },
+  { name: 'Groceries',
+    items: [
+      'Eggs',
+      'Milk',
+      'Bread'
+    ]
+  },
+  { name: 'Reminders',
+    items: [
+      'Take out trash',
+      'Paper due on Tuesday',
+      'Concert Friday'
     ]
   }
-];
-var selectedList = 0;
-var listDiv = document.getElementById("lists");
-var itemDiv = document.getElementById("list-items");
-var addListButton = document.getElementById("add-list-button");
-var addItemButton = document.getElementById("add-item-button");
+]
 
-// FUNCTIONS TO UPDATE THE HTML PAGE WITH RESPECT TO DATA
+// create a state object
+const state = { selectedList: 0 }
 
-// ADDING TO LIST
+// save references to all of our ui components
+const ui = {
+  lists: document.querySelector('#lists'),
+  items: document.querySelector('#list-items'),
+  popups: document.querySelectorAll('.popup'),
+  btn: {
+    addList: document.querySelector('#add-list-button'),
+    addItem: document.querySelector('#add-item-button'),
+    popup: document.querySelectorAll('.popup-button'),
+    close: document.querySelectorAll('.close')
+  }
+}
 
-// ADDING TO LIST ITEMS
+// initialize the app with these functions
+updateLists()
+updateUI()
+updateItems()
 
-// POP-UP HANDLING CODE
-var buttonsArray = document.querySelectorAll(".popup-button");
-// querySelectorAll returns a DOMTokenList and not an Array (which includes methods like forEach)
-buttonsArray = Array.from(buttonsArray); // Conevrting DOMTokenList to an Array
+// add events
+ui.btn.addList.addEventListener('click', addList)
+ui.btn.addItem.addEventListener('click', addItem)
+ui.lists.addEventListener('click', selectList)
+ui.btn.popup.forEach(btn => btn.addEventListener('click', openPopups))
+ui.btn.close.forEach(btn => btn.addEventListener('click', closePopups))
 
-buttonsArray.forEach(function(button) {
-  button.addEventListener("click", function() {
-    var popup = document.getElementById(this.dataset.popupid);
-    // The data attributes can be accessed by .dataset variable which is part of the DOMElement (check HTML for buttonsArray)
-    popup.style.display = "flex";
-  });
-});
+// event handlers
+function openPopups () {
+  const popup = document.getElementById(this.dataset.popupid)
+  popup.style.display = 'flex'
+  popup.querySelector('input[type="text"]').focus()
+}
 
-var closeButton = document.querySelectorAll(".close");
-closeButton.forEach(function(button, i) {
-  button.addEventListener("click", closePopups);
-});
+function closePopups () {
+  ui.popups.forEach(popup => {
+    popup.style.display = 'none'
+  })
+}
 
-function closePopups() {
-  var popupsArray = Array.from(document.querySelectorAll(".popup"));
-  popupsArray.forEach(function(popup) {
-    popup.style.display = "none";
-  });
+function addList (e) {
+  e.preventDefault()
+  const form = document['add-list-form']
+  const val = form['list-name-input'].value
+  if ( val.trim().length === 0 || val.length < 2 ) {
+    alert('Make sure the name of the list is greater than 2 characters!')
+    form.reset()
+    return
+  } else {
+    data.push({ name: val, items: [] })
+    form.reset()
+    closePopups()
+    updateLists()
+  }
+}
+
+function addItem (e) {
+  e.preventDefault()
+  const form = document['add-item-form']
+  const val = form['item-name-input'].value
+  if ( val.trim().length === 0 || val.length < 2 ) {
+    alert('Make sure the name of the item is greater than 2 characters!')
+    form.reset()
+    return
+  } else {
+    data[state.selectedList].items.push(val)
+    form.reset()
+    closePopups()
+    updateItems()
+  }
+}
+
+function selectList (e) {
+  const target = e.target
+  state.selectedList = target.dataset.index
+
+  updateUI()
+  updateItems()
+}
+
+// methods
+function updateUI() {
+  Array.from(lists.children)
+    .forEach(el => el.classList.remove('active'))
+
+  lists.querySelector(`[data-index='${state.selectedList}']`)
+    .classList.add('active')
+}
+
+function updateLists () {
+  let i = 0;
+  ui.lists.innerHTML = data.map(list => `
+    <a class='list-group-item list-group-item-action' data-index='${i++}'>
+      ${list.name}
+    </a>`)
+    .join('')
+
+  updateUI()
+}
+
+function updateItems () {
+  const selectedList = data[state.selectedList]
+
+  if (selectedList.items.length === 0) {
+    ui.items.innerHTML = `<p class="text-muted" style="padding-bottom: 10px;">There are 0 items in "${selectedList.name}"</p>`
+    return
+  }
+
+  ui.items.innerHTML = selectedList.items.map(item => `
+    <a class='list-group-item list-group-item-action'>
+      ${item}
+    </a>
+  `)
+  .join('')
 }
